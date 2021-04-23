@@ -1,31 +1,36 @@
+const cors = require('cors');
 const express = require('express');
 const morgan = require('morgan')
 const mongoose = require("mongoose");
-
 require('dotenv').config()
-
-const api=process.env.API_URL
 
 // Instantiate app
 const app = express();
 
+global.__basedir = __dirname;
+
 //middleware
-app.use(express.json())
-app.use(morgan('tiny'))
+app.use(cors());
+app.options("*", cors());
+app.use(express.json());
+app.use(morgan('tiny'));
+app.use("/public/uploads", express.static(__dirname + "/public/uploads"));
+app.use("/public/files", express.static(__dirname + "/public/files"));
+
+//Routes
+const categoriesRoutes = require("./routes/categories");
+const productsRoutes = require("./routes/products");
+const usersRoutes = require("./routes/users");
+
+const api = process.env.API_URL;
+
+app.use(`${api}/categories`, categoriesRoutes);
+app.use(`${api}/products`, productsRoutes);
+app.use(`${api}/users`, usersRoutes);
 
 //Health Check
 app.get(`${api}/`, (req,res) => {
     res.send("Hello There!");
-})
-
-//Sample Get a Product
-app.get(`${api}/products`, (req,res) => {
-    const product = {
-            id:1,
-            name:'soya bean',
-            image:'some_url'
-    }
-    res.send(product);
 })
 
 //Database
@@ -33,7 +38,7 @@ mongoose
   .connect(process.env.CONNECTION_STRING, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
-    dbName: "qlessshopping",
+    dbName: "eshopdemo",
   })
   .then(() => {
     console.log("Database Connection is ready...");
