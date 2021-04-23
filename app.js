@@ -1,4 +1,6 @@
+const authJwt = require("./helpers/jwt");
 const cors = require('cors');
+const errorHandler = require("./helpers/error-handler");
 const express = require('express');
 const morgan = require('morgan')
 const mongoose = require("mongoose");
@@ -14,6 +16,8 @@ app.use(cors());
 app.options("*", cors());
 app.use(express.json());
 app.use(morgan('tiny'));
+// app.use(authJwt());
+app.use(errorHandler);
 app.use("/public/uploads", express.static(__dirname + "/public/uploads"));
 app.use("/public/files", express.static(__dirname + "/public/files"));
 
@@ -21,12 +25,14 @@ app.use("/public/files", express.static(__dirname + "/public/files"));
 const categoriesRoutes = require("./routes/categories");
 const productsRoutes = require("./routes/products");
 const usersRoutes = require("./routes/users");
+const ordersRoutes = require("./routes/orders");
 
 const api = process.env.API_URL;
 
 app.use(`${api}/categories`, categoriesRoutes);
 app.use(`${api}/products`, productsRoutes);
 app.use(`${api}/users`, usersRoutes);
+app.use(`${api}/orders`, ordersRoutes);
 
 //Health Check
 app.get(`${api}/`, (req,res) => {
