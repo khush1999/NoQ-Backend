@@ -1,0 +1,23 @@
+{
+  "name": "qless-shopping-backend",
+  "version": "1.0.0",
+  "description": "A SaaS based Product for consumers to scan barcodes of products in nearby Kirana stores and pop stores which automatically add these products to the virtual cart and customers can pay online/tap & pay/wallet at POS and consumers can walk back home.",
+  "main": "app.js",
+  "scripts": {
+    "start": "nodemon app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://git.hashedin.com/khushal.vyas/qless-backend.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "nodemon": "^2.0.7"
+  },
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1"
+  }
+}
