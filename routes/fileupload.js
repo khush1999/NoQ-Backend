@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const path = require('path');
 
 // For excel sheet upload
 const fs = require('fs');
@@ -20,6 +21,7 @@ const FILE_TYPE_MAP = {
   };
   
   var storage = multer.diskStorage({
+  
     destination: function(req, file, cb) {
       const isValid = FILE_TYPE_MAP[file.mimetype];
       let uploadError = new Error('invalid csv type');
@@ -27,7 +29,8 @@ const FILE_TYPE_MAP = {
       if (isValid) {
           uploadError = null;
       }
-        cb(uploadError,  __basedir + '/public/files/');
+      let reqPath = path.join(__dirname, '../');
+        cb(uploadError, reqPath+'/public/files/');
     },
     filename: function(req, file, cb) {
       const fileName = file.originalname.split(' ').join('-');
@@ -38,12 +41,8 @@ const FILE_TYPE_MAP = {
 
   var upload = multer({storage: storage});
 
-
 // -> Express Upload RestAPIs
-router.post(`${api}/updatefile`, upload.single("uploadfile"), (req, res) =>{
-    //  res.json({
-    //     'msg': 'File uploaded/import successfully!', 'file': req.file
-    // });
+router.post(`/`, upload.single("file"), (req, res) =>{
     const file=req.file
     if (!file) {
       return res.status(500).send("Please upload an excel file!");
@@ -51,23 +50,18 @@ router.post(`${api}/updatefile`, upload.single("uploadfile"), (req, res) =>{
     else{
       //307 is for temp forward request 
       /*307 Temporary Redirect (since HTTP/1.1) In this occasion, the request should be repeated with another URI, but future requests can still use the original URI.2 In contrast to 303, the request method should not be changed when reissuing the original request. For instance, a POST request must be repeated using another POST request. */
-      res.redirect(307,`${api}/uploadDB/?DB=`+req.file.filename)
-    }
-    
+      res.redirect(307,`uploadDB/?DB=`+req.file.filename)
+    }  
 });
-
 
 // -> Import CSV File to MongoDB database
 function importCsvData2MongoDB(filePath)
 {
-
-    console.log("************************"+filePath);
     try {
       csv()
       .fromFile(filePath)
       .then((jsonObj)=>{
         var Validator = require('jsonschema').validate;
-        // var schema = {"sample_id": "number","name":"string","address":"string"};
         var schema = {
           "id": "abc",
           "type": "object",
@@ -79,12 +73,11 @@ function importCsvData2MongoDB(filePath)
           }
         };
         jsonObj.map((obj)=>{
-          console.log(Validator(obj, schema,{ allowUnknownAttributes: false }
-            ));
-          // if(!Validator(obj, schema,{ allowUnknownAttributes: false }
-          //   ).valid){
-          //   msg.push("Schema Not Valid")
-          // }
+
+          if(!Validator(obj, schema,{ allowUnknownAttributes: false }
+            ).valid){
+            msg.push("Schema Not Valid")
+          }
 
           if(obj.sample_id == ''){
             msg.push("Sample ID missing")
@@ -96,9 +89,11 @@ function importCsvData2MongoDB(filePath)
           }   
           if(obj.address == ''){
             msg.push(`Row ${obj.sample_id} has address field missing`)
-            console.log(`Row ${obj.sample_id} has address field missing`);          }   
+            console.log(`Row ${obj.sample_id} has address field missing`);          
+          }   
             
         })
+
         if(msg!=''){
           console.log("if reached"+msg);
          }
@@ -129,28 +124,22 @@ function importCsvData2MongoDB(filePath)
     }
 
 }
-router.post(`${api}/uploadDB`, upload.single("uploadfile"), async (req, res) =>{
-  console.log(req.query.DB);
-  console.log(__basedir.split("\routes")[0]);
-  let resp=await importCsvData2MongoDB(__basedir.split("\routes")[0] + '/public/files/' + req.query.DB);  
+
+router.post(`/uploadDB/`, upload.single("file"), async (req, res) =>{
+  let reqPath = path.join(__dirname, '../');
+  await importCsvData2MongoDB(reqPath + '/public/files/' + req.query.DB);  
    setTimeout(() => {
-    console.log(msg+"!!!!!!!!!!!!!!!!!!!");
     if(msg.includes('Success')){
       res.json({
-        'msg': 'File uploaded/import successfully!', 'file': req.file
-    });
-      
+        'msg': 'File uploaded/import successfully!', 'file': req.file 
+      });    
     }
     else{
       res.json(msg)
-      
     }
     msg=[]
-      
-  }, 3000);
+}, 1000);
   
 });
-
-
 
 module.exports =router;
