@@ -11,10 +11,15 @@ const app = express();
 
 global.__basedir = __dirname;
 
+const bodyParser = require("body-parser")
+
+app.use(bodyParser.urlencoded({ extended: true }));
 //middleware
 app.use(cors());
 app.options("*", cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 app.use(morgan('tiny'));
 // app.use(authJwt());
 app.use(errorHandler);
@@ -46,7 +51,7 @@ mongoose
   .connect(process.env.CONNECTION_STRING, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
-    dbName: "eshopdemo",
+    dbName: "Qless",
   })
   .then(() => {
     console.log("Database Connection is ready...");

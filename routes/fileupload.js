@@ -23,17 +23,31 @@ const FILE_TYPE_MAP = {
   var storage = multer.diskStorage({
   
     destination: function(req, file, cb) {
-      const isValid = FILE_TYPE_MAP[file.mimetype];
-      let uploadError = new Error('invalid csv type');
-  
-      if (isValid) {
-          uploadError = null;
-      }
-      let reqPath = path.join(__dirname, '../');
-        cb(uploadError, reqPath+'/public/files/');
+              let reqPath = path.join(__dirname, '../');
+// const filetype=req.file
+//     if (!filetype) {
+//       return res.status(500).send("Please upload an excel file!");
+//     }
+console.log(file);
+
+        if (file.mimetype == "text/csv") {
+            cb(null, reqPath+'/public/files/');
+        }
+        else {
+            return cb(new Error('Invalid csv type'));
+        }
+      // const isValid = FILE_TYPE_MAP[file.mimetype];
+      // let uploadError = new Error('invalid csv type');
+
+      // console.log(uploadError);
+      // console.log("***********************");
+      // if (isValid) {
+      //     uploadError = null;
+      // }
+      //   cb(uploadError, reqPath+'/public/files/');
     },
     filename: function(req, file, cb) {
-      const fileName = file.originalname.split(' ').join('-');
+      const fileName = file.originalname.split('.').join('-');
           const extension = FILE_TYPE_MAP[file.mimetype];
           cb(null, `${fileName}-${Date.now()}.${extension}`); 
     },
@@ -41,17 +55,44 @@ const FILE_TYPE_MAP = {
 
   var upload = multer({storage: storage});
 
+  const uploadoptions=upload.single("file")
 // -> Express Upload RestAPIs
-router.post(`/`, upload.single("file"), (req, res) =>{
-    const file=req.file
-    if (!file) {
+router.post(`/`, (req, res) =>{
+  
+    uploadoptions(req, res, function (err) {
+
+        if (err) {
+            return res.status(400).send({ message: err.message })
+        }
+
+        // Everything went fine.
+        //   //307 is for temp forward request 
+    //   /*307 Temporary Redirect (since HTTP/1.1) In this occasion, the request should be repeated with another URI, but future requests can still use the original URI.2 In contrast to 303, the request method should not be changed when reissuing the original request. For instance, a POST request must be repeated using another POST request. */
+    const fil=req.file
+    if(!fil){
       return res.status(500).send("Please upload an excel file!");
-    }
+    } 
     else{
-      //307 is for temp forward request 
-      /*307 Temporary Redirect (since HTTP/1.1) In this occasion, the request should be repeated with another URI, but future requests can still use the original URI.2 In contrast to 303, the request method should not be changed when reissuing the original request. For instance, a POST request must be repeated using another POST request. */
-      res.redirect(307,`uploadDB/?DB=`+req.file.filename)
-    }  
+          res.redirect(307,`uploadDB/?DB=`+req.file.filename)
+    }   
+        // const file = req.file;
+        // res.status(200).send({
+        //     filename: file.filename,
+        //     mimetype: file.mimetype,
+        //     originalname: file.originalname,
+        //     size: file.size,
+        //     fieldname: file.fieldname
+        // })
+    })
+    // const file=req.file
+    // if (!file) {
+    //   return res.status(500).send("Please upload an excel file!");
+    // }
+    // else{
+    //   //307 is for temp forward request 
+    //   /*307 Temporary Redirect (since HTTP/1.1) In this occasion, the request should be repeated with another URI, but future requests can still use the original URI.2 In contrast to 303, the request method should not be changed when reissuing the original request. For instance, a POST request must be repeated using another POST request. */
+    //   res.redirect(307,`uploadDB/?DB=`+req.file.filename)
+    // }  
 });
 
 // -> Import CSV File to MongoDB database
