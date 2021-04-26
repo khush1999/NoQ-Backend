@@ -3,6 +3,18 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+let otp
+   function generateOTP() 
+   {
+    // Declare a digits variable 
+    // which stores all digits
+    let digits = '0123456789';
+    let OTP = '';
+        for (let i = 0; i < 4; i++ ) {
+            OTP += digits[Math.floor(Math.random() * 10)];
+        }
+    return OTP;
+    }
 
 router.get('/', async (req, res) =>{
     const userList = await User.find().select('-passwordHash');
@@ -22,25 +34,13 @@ router.get('/:id', async(req,res)=>{
     res.status(200).send(user);
 })
 
-router.post('/', async (req,res)=>{
-    let user = new User({
-        name: req.body.name,
-        email: req.body.email,
-        passwordHash: bcrypt.hashSync(req.body.password, 10),
-        phone: req.body.phone,
-        isAdmin: req.body.isAdmin,
-        street: req.body.street,
-        apartment: req.body.apartment,
-        zip: req.body.zip,
-        city: req.body.city,
-        country: req.body.country,
-    })
-    user = await user.save();
+router.get('/verifyotp', async(req,res)=>{
+    const user = await User.findById(req.params.id).select('-passwordHash');
 
-    if(!user)
-    return res.status(400).send('the user cannot be created!')
-
-    res.send(user);
+    if(!user) {
+        res.status(500).json({message: 'The user with the given ID was not found.'})
+    } 
+    res.status(200).send(user);
 })
 
 router.put('/:id',async (req, res)=> {
@@ -76,34 +76,44 @@ router.put('/:id',async (req, res)=> {
     res.send(user);
 })
 
+/*
+Login Functionality-
+    -If the mobile number exist in DB, go to Homepage
+    - Else Go to SignUp Page
+*/
 router.post('/login', async (req,res) => {
-    const user = await User.findOne({email: req.body.email})
+    let ph =req.body.phone
+    
+    const user = await User.findOne({phone: ph})
     const secret = process.env.secret;
     if(!user) {
-        return res.status(400).send('The user not found');
+        return res.status(400).send('You have not registered your mobile number with us. Please do sign in!!!');
+    }
+    else
+    {
+        return res.status(200).json({
+        "success":true,
+        "msg":"Go to Home Page"
+        })
     }
 
-    if(user && bcrypt.compareSync(req.body.password, user.passwordHash)) {
-        const token = jwt.sign(
-            {
-                userId: user.id,
-                isAdmin: user.isAdmin
-            },
-            secret,
-            {expiresIn : '1d'}
-        )
-       
-        res.status(200).send({user: user.email , token: token}) 
-    } else {
-       res.status(400).send('password is wrong!');
-    }
+  
 })
 
+/*Signup for the user -
+  - Enter all the fields
+  - Verify your phone number
+  - Click on Register 
+*/ 
 router.post('/register', async (req,res)=>{
+    //  const checkuser = await User.findOne({phone: ph})
+    // const secret = process.env.secret;
+    // if(checkuser) {
+    //     return res.status(400).send('You have already registered your mobile number with us. Please do sign in!!!');
+    // }
     let user = new User({
         name: req.body.name,
         email: req.body.email,
-        passwordHash: bcrypt.hashSync(req.body.password, 10),
         phone: req.body.phone,
         isAdmin: req.body.isAdmin,
         street: req.body.street,
@@ -112,6 +122,7 @@ router.post('/register', async (req,res)=>{
         city: req.body.city,
         country: req.body.country,
     })
+
     user = await user.save();
 
     if(!user)
