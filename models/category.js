@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const categorySchema = mongoose.Schema({
     name: {
         type: String,
-        required: true,
+        // required: 'Please enter your name',
     },
     icon: {
         type: String,
@@ -11,10 +11,10 @@ const categorySchema = mongoose.Schema({
     image: { 
         type: String,
     },
-    product: [{
+    product: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Product',
-    }],
+    },
 })
 
 
