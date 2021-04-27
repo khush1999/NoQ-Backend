@@ -1,4 +1,5 @@
 require('dotenv/config')
+const {User} = require('../models/user');
 const express = require('express');
 const router = express.Router();
 const client = require('twilio')(process.env.ACCOUNT_SID, process.env.AUTH_TOKEN)
@@ -48,7 +49,10 @@ router.get('/sendOtp', (req,res) => {
 // Params - phone number
 //     - code
 
-router.get('/verifyOtp', (req, res) => {
+router.get('/verifyOtp', async (req, res) => {
+    let phone = req.query.phonenumber
+    const user = await User.findOne({phone: phone})
+
     if (req.query.phonenumber && (req.query.code).length === 4) {
         client
             .verify
@@ -60,9 +64,15 @@ router.get('/verifyOtp', (req, res) => {
             })
             .then(data => {
                 if (data.status === "approved") {
+                    let registered = true;
+                    if(!user) {
+                        registered = false;
+                    }
+                    console.log(data);
                     res.status(200).send({
-                        message: "User is Verified!!",
-                        data
+                        isUser: registered,
+                        isVerified: data.status,
+                        phoneNumber: data.to
                     })
                 }
             })
