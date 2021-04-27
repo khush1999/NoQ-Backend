@@ -15,9 +15,37 @@ let otp
         }
     return OTP;
     }
+    
+/*Signup for the user -
+  - If user's phone isn't in the database, then enter the details 
+  - Click on Register 
+*/
+router.post('/register', async (req,res)=>{
+let user;
+try {
+     user = new User({
+     name: req.body.name,
+     email: req.body.email,
+     phone: req.body.phone, // disabled this field in frontend
+     isAdmin: req.body.isAdmin,
+     street: req.body.street,
+     apartment: req.body.apartment,
+     zip: req.body.zip,
+     city: req.body.city,
+     country: req.body.country,
+ })
+    user = await user.save();
+}
+catch(err) {
+    res.status(400).json({msg: "Something went wrong, Pls fill all the fields!"})
+}
 
+res.send({data: user, msg: "Success"});
+})
+
+// Get all users
 router.get('/', async (req, res) =>{
-    const userList = await User.find().select('-passwordHash');
+    const userList = await User.find();
 
     if(!userList) {
         res.status(500).json({success: false})
@@ -25,8 +53,9 @@ router.get('/', async (req, res) =>{
     res.send(userList);
 })
 
-router.get('/:id', async(req,res)=>{
-    const user = await User.findById(req.params.id).select('-passwordHash');
+// Find user by id
+router.get('/:id', async (req,res)=>{
+    const user = await User.findById(req.params.id);
 
     if(!user) {
         res.status(500).json({message: 'The user with the given ID was not found.'})
@@ -34,103 +63,40 @@ router.get('/:id', async(req,res)=>{
     res.status(200).send(user);
 })
 
-router.get('/verifyotp', async(req,res)=>{
-    const user = await User.findById(req.params.id).select('-passwordHash');
-
-    if(!user) {
-        res.status(500).json({message: 'The user with the given ID was not found.'})
-    } 
-    res.status(200).send(user);
-})
-
+// Update user by id
 router.put('/:id',async (req, res)=> {
-
-    const userExist = await User.findById(req.params.id);
-    let newPassword
-    if(req.body.password) {
-        newPassword = bcrypt.hashSync(req.body.password, 10)
-    } else {
-        newPassword = userExist.passwordHash;
+    let userExist;
+    try {
+        userExist = await User.findById(req.params.id);
+        console.log(userExist);
+    } catch (err) {
+        res.status(400).json({msg: "Invaid User id"})
     }
-
-    const user = await User.findByIdAndUpdate(
-        req.params.id,
+    User.findByIdAndUpdate(req.params.id,
         {
             name: req.body.name,
             email: req.body.email,
-            passwordHash: newPassword,
-            phone: req.body.phone,
-            isAdmin: req.body.isAdmin,
+            phone: userExist.phone,
+            isAdmin: userExist.isAdmin,
             street: req.body.street,
             apartment: req.body.apartment,
             zip: req.body.zip,
             city: req.body.city,
-            country: req.body.country,
+            country: userExist.country,
         },
-        { new: true}
-    )
-
-    if(!user)
-    return res.status(400).send('the user cannot be created!')
-
-    res.send(user);
-})
-
-/*
-Login Functionality-
-    -If the mobile number exist in DB, go to Homepage
-    - Else Go to SignUp Page
-*/
-router.post('/login', async (req,res) => {
-    let ph =req.body.phone
-    
-    const user = await User.findOne({phone: ph})
-    const secret = process.env.secret;
-    if(!user) {
-        return res.status(400).send('You have not registered your mobile number with us. Please do sign in!!!');
-    }
-    else
-    {
-        return res.status(200).json({
-        "success":true,
-        "msg":"Go to Home Page"
-        })
-    }
-
-  
-})
-
-/*Signup for the user -
-  - Enter all the fields
-  - Verify your phone number
-  - Click on Register 
-*/ 
-router.post('/register', async (req,res)=>{
-    //  const checkuser = await User.findOne({phone: ph})
-    // const secret = process.env.secret;
-    // if(checkuser) {
-    //     return res.status(400).send('You have already registered your mobile number with us. Please do sign in!!!');
-    // }
-    let user = new User({
-        name: req.body.name,
-        email: req.body.email,
-        phone: req.body.phone,
-        isAdmin: req.body.isAdmin,
-        street: req.body.street,
-        apartment: req.body.apartment,
-        zip: req.body.zip,
-        city: req.body.city,
-        country: req.body.country,
+        { new: true} // to reflect updated change
+    ).then(user =>{
+        if(user) {
+            return res.status(200).json({success: true, message: 'The User is updated!'})
+        } else {
+            return res.status(404).json({success: false , message: "User not found!"})
+        }
+    }).catch(err=>{
+       return res.status(500).json({success: false, error: err}) 
     })
-
-    user = await user.save();
-
-    if(!user)
-    return res.status(400).send('the user cannot be created!')
-
-    res.send(user);
 })
 
+// Delete user by id
 router.delete('/:id', (req, res)=>{
     User.findByIdAndRemove(req.params.id).then(user =>{
         if(user) {
@@ -143,6 +109,7 @@ router.delete('/:id', (req, res)=>{
     })
 })
 
+// Get user count for analytics purpose
 router.get('/get/count', async (req, res) =>{
     const userCount = await User.countDocuments((count) => count)
 
