@@ -23,17 +23,17 @@ let otp
 router.post('/register', async (req,res)=>{
 let user;
 try {
-     user = new User({
-     name: req.body.name,
-     email: req.body.email,
-     phone: req.body.phone, // disabled this field in frontend
-     isAdmin: req.body.isAdmin,
-     street: req.body.street,
-     apartment: req.body.apartment,
-     zip: req.body.zip,
-     city: req.body.city,
-     country: req.body.country,
- })
+    user = new User({
+        name: req.body.name,
+        email: req.body.email,
+        phone: req.body.phone, // disabled this field in frontend
+        isAdmin: req.body.isAdmin,
+        street: req.body.street,
+        building: req.body.building,
+        pincode: req.body.pincode,
+        city: req.body.city,
+        state: req.body.state,
+    })
     user = await user.save();
 }
 catch(err) {

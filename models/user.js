@@ -21,11 +21,11 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: ''
     },
-    apartment: {
+    building: {
         type: String,
         default: ''
     },
-    zip :{
+    pincode :{
         type: String,
         default: ''
     },
@@ -33,11 +33,10 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: ''
     },
-    country: {
+    state: {
         type: String,
         default: ''
     }
-
 });
 
 userSchema.virtual('user_id').get(function () {
