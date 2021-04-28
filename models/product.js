@@ -1,30 +1,25 @@
 const mongoose = require('mongoose');
 
-const productSchema = mongoose.Schema({
+const productSchema = new mongoose.Schema({
     name: {
         type: String,
         required: true,
     },
     description: {
         type: String,
-        required: true
+        default: '',
     },
     image: {
         type: String,
         default: '',
-        required: true,
     },
     brand: {
         type: String,
         default: '',
-        required: true,
-
     },
     price : {
         type: Number,
         default:0,
-        required: true,
-
     },
     category: {
         type: mongoose.Schema.Types.ObjectId,
@@ -33,7 +28,6 @@ const productSchema = mongoose.Schema({
     },
     count_in_stock: {
         type: Number,
-        required: true,
         min: 0,
         max: 50
     },
@@ -59,14 +53,12 @@ const productSchema = mongoose.Schema({
         default:0,
         min:0,
         max:25,
-        required: true,
     },
     bulk_discount_percentage:{
         type:Number,
         default:0,
         min:0,
         max:75,
-        required: true,
     },
     max_qty:{
         type:Number,
@@ -94,3 +86,4 @@ productSchema.set('toJSON', {
 
 
 exports.Product = mongoose.model('Product', productSchema);
+exports.productSchema = productSchema;
