@@ -27,20 +27,20 @@ app.use("/public/uploads", express.static(__dirname + "/public/uploads"));
 app.use("/public/files", express.static(__dirname + "/public/files"));
 
 //Session Cookie
-app.use(cookieParser());
-app.use(session({
-    store: new RedisStore({
-        host: 'noq-redis-001.v9shsg.0001.use1.cache.amazonaws.com',
-        port: 6379
-    }), 
-    secret: process.env.SECRET,
-    resave: true,
-    saveUninitialized: true,
-    cookie: {
-        httpOnly: true,
-        secure: false //turn to true on production once https is in place
-    }
-}));
+// app.use(cookieParser());
+// app.use(session({
+//     store: new RedisStore({
+//         host: 'noq-redis-001.v9shsg.0001.use1.cache.amazonaws.com',
+//         port: 6379
+//     }), 
+//     secret: process.env.SECRET,
+//     resave: true,
+//     saveUninitialized: true,
+//     cookie: {
+//         httpOnly: true,
+//         secure: false //turn to true on production once https is in place
+//     }
+// }));
 
 //Routes
 const categoriesRoutes = require("./routes/categories");
