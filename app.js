@@ -78,8 +78,8 @@ mongoose
     console.log(err);
   });
 
-const host = 'localhost';
+const host = '0.0.0.0';
 const port = process.env.PORT || 5000;
-app.listen(port, () => {
+app.listen(port, host, () => {
     console.log(`Server running at http://${host}:${port}`);
 })
