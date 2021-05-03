@@ -24,7 +24,8 @@ let url = process.env.CONNECTION_STRING
 let msg=[]
 
 const csv=require('csvtojson')
- 
+let reqPath = path.join(__dirname, '../');
+
 global.__basedir = __dirname;
 
 // -> Multer Upload Storage
@@ -35,7 +36,7 @@ const FILE_TYPE_MAP = {
   var storage = multer.diskStorage({
   
     destination: function(req, file, cb) {
-              let reqPath = path.join(__dirname, '../');
+              
 // const filetype=req.file
 //     if (!filetype) {
 //       return res.status(500).send("Please upload an excel file!");
@@ -66,7 +67,7 @@ console.log(file);
   });
 
   var upload = multer({storage: storage});
-
+const uploadImg = multer({ dest: reqPath+'/public/' })
   const uploadoptions=upload.single("file")
 // -> Express Upload RestAPIs
 router.post(`/`, (req, res) =>{
@@ -131,20 +132,20 @@ const download_image = (url, image_path) =>
       }),
   );
 
-const uploadImageToS3 = () => {
-  fs.readFile(fileName, (err, data) => {
-     if (err) throw err;
-     const params = {
-         Bucket: 'hbs-noq', // pass your bucket name
-         Key: 'image.png', // file will be saved as testBucket/contacts.csv
-         Body: JSON.stringify(data, null, 2)
-     };
-     s3.upload(params, function(s3Err, data) {
-         if (s3Err) throw s3Err
-         console.log(`File uploaded successfully at ${data.Location}`)
-     });
-  });
-};  
+// const uploadImageToS3 = () => {
+//   fs.readFile(fileName, (err, data) => {
+//      if (err) throw err;
+//      const params = {
+//          Bucket: 'hbs-noq', // pass your bucket name
+//          Key: 'image.png', // file will be saved as testBucket/contacts.csv
+//          Body: JSON.stringify(data, null, 2)
+//      };
+//      s3.upload(params, function(s3Err, data) {
+//          if (s3Err) throw s3Err
+//          console.log(`File uploaded successfully at ${data.Location}`)
+//      });
+//   });
+// };  
 // -> Import CSV File to MongoDB database
 function importCsvData2MongoDB(filePath)
 {
@@ -246,7 +247,7 @@ function importCsvData2MongoDB(filePath)
             msg.push(`Row ${obj.max_qty} has max_qty field missing`)
             console.log(`Row ${obj.max_qty} has max_qty field missing`); 
           }   
-let example_image_1 = await download_image(obj.image, 'image.png');           
+          let example_image_1 = await download_image(obj.image, 'image.png');           
 
           console.log("++++++++++++++++++++++++"+example_image_1); 
 
