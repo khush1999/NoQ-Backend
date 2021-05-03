@@ -1,24 +1,25 @@
 const mongoose = require('mongoose');
 
 const addressSchema = mongoose.Schema({
-    shippingAddress1: {
+    street: {
         type: String,
-        required: true,
+        default: ''
     },
-    shippingAddress2: {
+    building: {
         type: String,
+        default: ''
+    },
+    pincode :{
+        type: String,
+        default: ''
     },
     city: {
         type: String,
-        required: true,
+        default: ''
     },
-    zip: {
+    state: {
         type: String,
-        required: true,
-    },
-    country: {
-        type: String,
-        required: true,
+        default: ''
     },
     user: {
         type: mongoose.Schema.Types.ObjectId,
