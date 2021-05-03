@@ -50,6 +50,7 @@ app.use("/public/files", express.static(__dirname + "/public/files"));
 const categoriesRoutes = require("./routes/categories");
 const productsRoutes = require("./routes/products");
 const usersRoutes = require("./routes/users");
+const addressRoutes = require("./routes/addresses");
 const ordersRoutes = require("./routes/orders");
 const fileuploadRoutes = require("./routes/fileupload");
 const phoneAuthRoutes = require("./routes/phoneAuth");
@@ -59,6 +60,7 @@ const api = process.env.API_URL;
 app.use(`${api}/categories`, categoriesRoutes);
 app.use(`${api}/products`, productsRoutes);
 app.use(`${api}/users`, usersRoutes);
+app.use(`${api}/address`, addressRoutes);
 app.use(`${api}/orders`, ordersRoutes);
 app.use(`${api}/uploadfile`, fileuploadRoutes);
 app.use(`${api}/auth`, phoneAuthRoutes);
@@ -73,7 +75,7 @@ mongoose
   .connect(process.env.CONNECTION_STRING, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
-    dbName: "Test",
+    dbName: "Qless",
   })
   .then(() => {
     console.log("Database Connection is ready...");

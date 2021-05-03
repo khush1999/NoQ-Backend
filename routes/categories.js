@@ -49,7 +49,7 @@ router.get('/', async (req, res) =>{
     } 
     
     res.status(200).send(categoryList);
-})
+});
 
 router.post('/', async (req,res)=>{
     // let prods1= await Category.find().populate("products")
