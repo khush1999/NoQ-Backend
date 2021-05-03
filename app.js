@@ -5,6 +5,10 @@ const express = require('express');
 const morgan = require('morgan')
 const mongoose = require("mongoose");
 require('dotenv').config()
+const fs = require('fs');
+
+const util = require('util')
+const unlinkFile = util.promisify(fs.unlink)
 
 // Instantiate app
 const app = express();
@@ -69,7 +73,7 @@ mongoose
   .connect(process.env.CONNECTION_STRING, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
-    dbName: "Qless",
+    dbName: "Test",
   })
   .then(() => {
     console.log("Database Connection is ready...");
