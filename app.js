@@ -5,6 +5,13 @@ const express = require('express');
 const morgan = require('morgan')
 const mongoose = require("mongoose");
 require('dotenv').config()
+const fs = require('fs');
+
+const session = require('express-session')
+const cookieParser = require('cookie-parser')
+
+const util = require('util')
+const unlinkFile = util.promisify(fs.unlink)
 
 // Instantiate app
 const app = express();
@@ -26,10 +33,18 @@ app.use(errorHandler);
 app.use("/public/uploads", express.static(__dirname + "/public/uploads"));
 app.use("/public/files", express.static(__dirname + "/public/files"));
 
+app.use(cookieParser())
+app.use(session({
+  resave:true,
+  saveUninitialized:true,
+  secret:process.env.secret
+}))
+
 //Routes
 const categoriesRoutes = require("./routes/categories");
 const productsRoutes = require("./routes/products");
 const usersRoutes = require("./routes/users");
+const addressRoutes = require("./routes/addresses");
 const ordersRoutes = require("./routes/orders");
 const fileuploadRoutes = require("./routes/fileupload");
 const phoneAuthRoutes = require("./routes/phoneAuth");
@@ -39,13 +54,24 @@ const api = process.env.API_URL;
 app.use(`${api}/categories`, categoriesRoutes);
 app.use(`${api}/products`, productsRoutes);
 app.use(`${api}/users`, usersRoutes);
+app.use(`${api}/address`, addressRoutes);
 app.use(`${api}/orders`, ordersRoutes);
 app.use(`${api}/uploadfile`, fileuploadRoutes);
 app.use(`${api}/auth`, phoneAuthRoutes);
 
 //Health Check
 app.get(`${api}/`, (req,res) => {
-    res.send("Hello There!");
+    // res.send({
+    //   data:req.session.user
+    // });
+    ssn = req.session; 
+  if(ssn.phone) {
+    res.status(200).send({"data":ssn.phone});
+  } 
+  else 
+  {
+    res.status(200).send({"data":'nothing'});
+  }
 })
 
 //Database
@@ -62,8 +88,8 @@ mongoose
     console.log(err);
   });
 
-const host = 'localhost';
-const port = 3000;
-app.listen(port, () => {
+const host = '0.0.0.0';
+const port = process.env.PORT || 5000;
+app.listen(port, host, () => {
     console.log(`Server running at http://${host}:${port}`);
 })

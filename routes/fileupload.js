@@ -1,18 +1,31 @@
+const {Category} = require('../models/category');
+
 const express = require('express');
 const router = express.Router();
 const path = require('path');
 
 // For excel sheet upload
 const fs = require('fs');
+const axios = require('axios');
 const multer = require('multer');
 const api = process.env.API_URL;
 
+//For AWS S3 Bucket
+const AWS = require('aws-sdk');
+const s3 = new AWS.S3({
+  accessKeyId: process.env.AWS_ACCESS_KEY,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+});
+
+const filename='image.png'
+let s3path;
 let MongoClient = require('mongodb').MongoClient;
 let url = process.env.CONNECTION_STRING
 let msg=[]
 
 const csv=require('csvtojson')
- 
+let reqPath = path.join(__dirname, '../');
+
 global.__basedir = __dirname;
 
 // -> Multer Upload Storage
@@ -23,7 +36,7 @@ const FILE_TYPE_MAP = {
   var storage = multer.diskStorage({
   
     destination: function(req, file, cb) {
-              let reqPath = path.join(__dirname, '../');
+              
 // const filetype=req.file
 //     if (!filetype) {
 //       return res.status(500).send("Please upload an excel file!");
@@ -54,7 +67,7 @@ console.log(file);
   });
 
   var upload = multer({storage: storage});
-
+const uploadImg = multer({ dest: reqPath+'/public/' })
   const uploadoptions=upload.single("file")
 // -> Express Upload RestAPIs
 router.post(`/`, (req, res) =>{
@@ -95,6 +108,44 @@ router.post(`/`, (req, res) =>{
     // }  
 });
 
+function validURL(str) {
+  var pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
+    '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name
+    '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
+    '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
+    '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
+    '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
+  return !!pattern.test(str);
+}
+
+const download_image = (url, image_path) =>
+  axios({
+    url,
+    responseType: 'stream',
+  }).then(
+    response =>
+      new Promise((resolve, reject) => {
+        response.data
+          .pipe(fs.createWriteStream(image_path))
+          .on('finish', () => resolve())
+          .on('error', e => reject(e));
+      }),
+  );
+
+// const uploadImageToS3 = () => {
+//   fs.readFile(fileName, (err, data) => {
+//      if (err) throw err;
+//      const params = {
+//          Bucket: 'hbs-noq', // pass your bucket name
+//          Key: 'image.png', // file will be saved as testBucket/contacts.csv
+//          Body: JSON.stringify(data, null, 2)
+//      };
+//      s3.upload(params, function(s3Err, data) {
+//          if (s3Err) throw s3Err
+//          console.log(`File uploaded successfully at ${data.Location}`)
+//      });
+//   });
+// };  
 // -> Import CSV File to MongoDB database
 function importCsvData2MongoDB(filePath)
 {
@@ -108,31 +159,108 @@ function importCsvData2MongoDB(filePath)
           "type": "object",
           "properties": 
           {
-            "sample_id": {"type": "string"},
             "name": {"type": "string"},
-            "address": {"type": "string"},
+            "description": {"type": "string"},
+            "image": {"type": "string"}, // "http://localhost:3000/public/upload/image-2323232"
+            "brand": {"type": "string"},
+            "price": {"type": "string"},
+            "category": {"type": "string"},
+            "count_in_stock": {"type": "string"},
+            "rating": {"type": "string"},
+            "num_reviews": {"type": "string"},
+            "isFeatured": {"type": "string"},
+            "product_SKU":{"type": "string"},
+            "discount_percentage":{"type": "string"},
+            "bulk_discount_percentage":{"type": "string"},
+            "max_qty":{"type": "string"},
           }
         };
-        jsonObj.map((obj)=>{
-
+        jsonObj.map(async (obj)=>{
+          // const category = await Category.findById(req.body.category);
           if(!Validator(obj, schema,{ allowUnknownAttributes: false }
             ).valid){
             msg.push("Schema Not Valid")
           }
-
-          if(obj.sample_id == ''){
-            msg.push("Sample ID missing")
-            console.log("Sample ID missing"); 
-          }   
+  
           if(obj.name == ''){
-            msg.push(`Row ${obj.sample_id} has name field missing`)
-            console.log(`Row ${obj.sample_id} has name field missing`); 
+            msg.push(`Row ${obj.name} has name field missing`)
+            console.log(`Row ${obj.name} has name field missing`); 
+          }
+ 
+          if(obj.description == ''){
+            msg.push("Description is missing")
+            console.log("Description is missing"); 
           }   
-          if(obj.address == ''){
-            msg.push(`Row ${obj.sample_id} has address field missing`)
-            console.log(`Row ${obj.sample_id} has address field missing`);          
+          console.log(validURL(obj.image));
+          if(!validURL(obj.image)){
+            msg.push(`Row ${obj.name} has image field missing/invalid URL`)
+            console.log(`Row ${obj.name} has address field missing`);          
+          }
+
+          
+          if(obj.brand == ''){
+            msg.push("Brand field is missing")
+            console.log("Brand field is missing"); 
           }   
-            
+
+          if(obj.price == ''){
+            msg.push(`Row ${obj.price} has price field missing`)
+            console.log(`Row ${obj.price} has price field missing`); 
+          }   
+          if(obj.category == ''){
+            msg.push(`Row ${obj.category} has category field missing`)
+            console.log(`Row ${obj.category} has category field missing`); 
+          }   
+          if(!Category.findById(obj.category)){
+            msg.push("Category ID NOT FOUND")
+            console.log("Category ID NOT FOUND"); 
+          }   
+          if(obj.count_in_stock == ''){
+            msg.push(`Row ${obj.count_in_stock} has count_in_stock field missing`)
+            console.log(`Row ${obj.count_in_stock} has count_in_stock field missing`); 
+          }   
+          if(obj.rating == ''){
+            msg.push("rating missing")
+            console.log("rating missing"); 
+          }   
+          if(obj.num_reviews == ''){
+            msg.push(`Row ${obj.num_reviews} has num_reviews field missing`)
+            console.log(`Row ${obj.num_reviews} has num_reviews field missing`); 
+          }   
+          if(obj.isFeatured == ''){
+            msg.push("isFeatured ID NOT FOUND")
+            console.log("isFeatured ID NOT FOUND"); 
+          }   
+          if(obj.product_SKU == ''){
+            msg.push(`Row ${obj.product_SKU} has product_SKU field missing`)
+            console.log(`Row ${obj.product_SKU} has product_SKU field missing`); 
+          }   
+          if(obj.discount_percentage == ''){
+            msg.push(`Row ${obj.discount_percentage} has discount_percentage field missing`)
+            console.log(`Row ${obj.discount_percentage} has discount_percentage field missing`); 
+          }   
+          if(obj.bulk_discount_percentage == ''){
+            msg.push(`Row ${obj.bulk_discount_percentage} has bulk_discount_percentage field missing`)
+            console.log(`Row ${obj.bulk_discount_percentage} has bulk_discount_percentage field missing`); 
+          }   
+          if(obj.max_qty == ''){
+            msg.push(`Row ${obj.max_qty} has max_qty field missing`)
+            console.log(`Row ${obj.max_qty} has max_qty field missing`); 
+          }   
+          let example_image_1 = await download_image(obj.image, 'image.png');           
+
+          console.log("++++++++++++++++++++++++"+example_image_1); 
+
+          uploadImageToS3()
+          // (async ()=>{
+          // let example_image_1 = await download_image(obj.image, 'image.png');           
+
+          // console.log("++++++++++++++++++++++++"+example_image_1); 
+
+          // uploadImageToS3()
+
+          // })
+
         })
 
         if(msg!=''){

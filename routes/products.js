@@ -70,6 +70,36 @@ router.get('/:id', async (req, res) => {
     res.send(product);
 });
 
+router.post('/new', async (req, res) => {
+    const category = await Category.findById(req.body.category);
+    if (!category) return res.status(400).send('Invalid Category');
+
+    let product = new Product({
+        name: req.body.name,
+        description: req.body.description,
+        image: req.body.image, // "http://localhost:3000/public/upload/image-2323232"
+        brand: req.body.brand,
+        price: req.body.price,
+        category: req.body.category,
+        count_in_stock: req.body.count_in_stock,
+        rating: req.body.rating,
+        num_reviews: req.body.num_reviews,
+        isFeatured: req.body.isFeatured,
+        product_SKU:req.body.product_SKU,
+        discount_percentage:req.body.discount_percentage,
+        bulk_discount_percentage:req.body.bulk_discount_percentage,
+        max_qty:req.body.max_qty,
+        created_at:req.body.created_at,
+        updated_at:req.body.updated_at,
+    });
+
+    product = await product.save();
+
+    if (!product) return res.status(500).send('The product cannot be created');
+
+    res.send(product);
+});
+
 router.post('/', uploadOptions.single('image'), async (req, res) => {
     const category = await Category.findById(req.body.category);
     if (!category) return res.status(400).send('Invalid Category');
@@ -192,6 +222,19 @@ router.get('/get/featured/:count', async (req, res) => {
     res.send(products);
 });
 
+// API for getting Product by SKU for Barcode Scanning
+router.get('/sku/get', async (req, res) => {
+
+    let product;
+    try {
+        let product_sku = req.query.sku
+        product = await Product.findOne({product_SKU: product_sku}).populate('category');
+    } catch (error) {
+        res.status(400).json({msg: "Invaid Product SKU"})
+    }
+
+    res.send(product);
+});
 // Good to have a gallery images API (Carousel)
 
 module.exports = router;
