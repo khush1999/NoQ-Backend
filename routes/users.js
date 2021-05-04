@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+
 let otp
    function generateOTP() 
    {
@@ -21,12 +22,13 @@ let otp
   - Click on Register 
 */
 router.post('/register', async (req,res)=>{
+let phoneNo=`+91${req.body.phone}` 
 let user;
 try {
     user = new User({
         name: req.body.name,
         email: req.body.email,
-        phone: req.body.phone, // disabled this field in frontend
+        phone: phoneNo, // disabled this field in frontend
         isAdmin: req.body.isAdmin,
         street: req.body.street,
         building: req.body.building,
@@ -35,6 +37,10 @@ try {
         state: req.body.state,
     })
     user = await user.save();
+    
+    req.session.phone = phoneNo;
+    console.log(req.session.phone+"********************");
+    req.session.save();
 }
 catch(err) {
     res.status(400).json({msg: "Something went wrong, Pls fill all the fields!"})
@@ -45,8 +51,14 @@ res.send({data: user, msg: "Success"});
 
 // Get all users
 router.get('/', async (req, res) =>{
-    const userList = await User.find();
-
+     let userList
+    try {
+    userList = await User.find();
+       
+    } catch (error) {
+        
+    }
+ 
     if(!userList) {
         res.status(500).json({success: false})
     } 
@@ -120,5 +132,7 @@ router.get('/get/count', async (req, res) =>{
         userCount: userCount
     });
 })
+
+
 
 module.exports =router;

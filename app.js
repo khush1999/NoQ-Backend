@@ -7,6 +7,9 @@ const mongoose = require("mongoose");
 require('dotenv').config()
 const fs = require('fs');
 
+const session = require('express-session')
+const cookieParser = require('cookie-parser')
+
 const util = require('util')
 const unlinkFile = util.promisify(fs.unlink)
 
@@ -30,21 +33,13 @@ app.use(errorHandler);
 app.use("/public/uploads", express.static(__dirname + "/public/uploads"));
 app.use("/public/files", express.static(__dirname + "/public/files"));
 
-//Session Cookie
-// app.use(cookieParser());
-// app.use(session({
-//     store: new RedisStore({
-//         host: 'noq-redis-001.v9shsg.0001.use1.cache.amazonaws.com',
-//         port: 6379
-//     }), 
-//     secret: process.env.SECRET,
-//     resave: true,
-//     saveUninitialized: true,
-//     cookie: {
-//         httpOnly: true,
-//         secure: false //turn to true on production once https is in place
-//     }
-// }));
+app.use(cookieParser())
+app.use(session({
+  resave:true,
+  saveUninitialized:true,
+  secret:process.env.secret,
+  cookie:{maxAge:3600000*24}
+}))
 
 //Routes
 const categoriesRoutes = require("./routes/categories");
@@ -65,9 +60,16 @@ app.use(`${api}/orders`, ordersRoutes);
 app.use(`${api}/uploadfile`, fileuploadRoutes);
 app.use(`${api}/auth`, phoneAuthRoutes);
 
-//Health Check
+// isLoggedIn Check
 app.get(`${api}/`, (req,res) => {
-    res.send("Hello There!");
+  isLoggedIn = req.session; 
+  if(isLoggedIn.phone) {
+    res.status(200).send({"data":isLoggedIn.phone});
+  } 
+  else 
+  {
+    res.status(200).send({"data":'nothing'});
+  }
 })
 
 //Database

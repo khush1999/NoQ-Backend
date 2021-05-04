@@ -26,7 +26,7 @@ router.get('/sendOtp', (req,res) => {
         .services(process.env.SERVICE_ID)
         .verifications
         .create({
-            to: `+${req.query.phonenumber}`,
+            to: `+91${req.query.phonenumber}`,
             channel: req.query.channel==='call' ? 'call' : 'sms' 
         })
         .then(data => {
@@ -50,7 +50,7 @@ router.get('/sendOtp', (req,res) => {
 //     - code
 
 router.get('/verifyOtp', async (req, res) => {
-    let phone = req.query.phonenumber
+    let phone = `+91${req.query.phonenumber}`
     const user = await User.findOne({phone: phone})
 
     if (req.query.phonenumber && (req.query.code).length === 4) {
@@ -59,7 +59,7 @@ router.get('/verifyOtp', async (req, res) => {
             .services(process.env.SERVICE_ID)
             .verificationChecks
             .create({
-                to: `+${req.query.phonenumber}`,
+                to: `+91${req.query.phonenumber}`,
                 code: req.query.code
             })
             .then(data => {
@@ -67,6 +67,11 @@ router.get('/verifyOtp', async (req, res) => {
                     let registered = true;
                     if(!user) {
                         registered = false;
+                    }
+                    else
+                    {
+                        req.session.phone = phone;
+                        req.session.save();
                     }
                     console.log(data);
                     res.status(200).send({
