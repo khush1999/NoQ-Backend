@@ -22,7 +22,7 @@ let otp
   - Click on Register 
 */
 router.post('/register', async (req,res)=>{
-let phoneNo=`91${req.body.phone}` 
+let phoneNo=`+91${req.body.phone}` 
 let user;
 try {
     user = new User({

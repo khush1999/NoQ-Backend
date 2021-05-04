@@ -50,7 +50,7 @@ router.get('/sendOtp', (req,res) => {
 //     - code
 
 router.get('/verifyOtp', async (req, res) => {
-    let phone = req.query.phonenumber
+    let phone = `+91${req.query.phonenumber}`
     const user = await User.findOne({phone: phone})
 
     if (req.query.phonenumber && (req.query.code).length === 4) {
