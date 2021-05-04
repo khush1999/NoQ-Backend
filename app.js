@@ -37,7 +37,8 @@ app.use(cookieParser())
 app.use(session({
   resave:true,
   saveUninitialized:true,
-  secret:process.env.secret
+  secret:process.env.secret,
+  cookie:{maxAge:3600000*24}
 }))
 
 //Routes
@@ -59,14 +60,11 @@ app.use(`${api}/orders`, ordersRoutes);
 app.use(`${api}/uploadfile`, fileuploadRoutes);
 app.use(`${api}/auth`, phoneAuthRoutes);
 
-//Health Check
+// isLoggedIn Check
 app.get(`${api}/`, (req,res) => {
-    // res.send({
-    //   data:req.session.user
-    // });
-    ssn = req.session; 
-  if(ssn.phone) {
-    res.status(200).send({"data":ssn.phone});
+  isLoggedIn = req.session; 
+  if(isLoggedIn.phone) {
+    res.status(200).send({"data":isLoggedIn.phone});
   } 
   else 
   {
