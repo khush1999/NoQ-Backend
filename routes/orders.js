@@ -14,6 +14,19 @@ router.get(`/`, async (req, res) => {
   res.send(orderList);
 });
 
+router.get(`/orderHistory`, async (req, res) => {
+  const orderList = await Order.find()
+    .populate("user", "name")
+    .sort({ dateOrdered: -1 });
+  let user = req.query.userId;
+  orderHistory = orderList.filter(orders => orders.user.user_id == user)
+  console.log("#########", orderHistory);
+  if (!orderList) {
+    res.status(500).json({ success: false });
+  }
+  res.send(orderList);
+});
+
 router.get(`/:id`, async (req, res) => {
   const order = await Order.findById(req.params.id)
     .populate("user", "name")
