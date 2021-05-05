@@ -20,7 +20,7 @@ router.get('/', (req, res)=>{
 //     - channel (sms/call)
 
 router.get('/sendOtp', (req,res) => {
-     if (req.query.phonenumber) {
+     if (req.query.phonenumber.length==10) {
         client
         .verify
         .services(process.env.SERVICE_ID)
@@ -35,12 +35,16 @@ router.get('/sendOtp', (req,res) => {
                 phonenumber: req.query.phonenumber,
                 data
             })
-        }) 
+        }).catch(
+            res.status(400).send({
+                message: "invalid number",
+                phonenumber: req.query.phonenumber,
+        })
+            ) 
      } else {
         res.status(400).send({
             message: "Wrong phone number :(",
             phonenumber: req.query.phonenumber,
-            data
         })
      }
 })
@@ -79,10 +83,13 @@ router.get('/verifyOtp', async (req, res) => {
                         isVerified: data.status,
                         phoneNumber: data.to
                     })
-                } else {
-                    console.log("Timeout");
                 }
-            })
+            }).catch(
+                res.status(400).send({
+            message: "invalid",
+            phonenumber: req.query.phonenumber,
+        })
+            )
     } else {
         res.status(400).send({
             message: "Wrong phone number or code :(",
