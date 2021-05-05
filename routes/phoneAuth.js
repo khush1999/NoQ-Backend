@@ -79,6 +79,8 @@ router.get('/verifyOtp', async (req, res) => {
                         isVerified: data.status,
                         phoneNumber: data.to
                     })
+                } else {
+                    console.log("Timeout");
                 }
             })
     } else {
