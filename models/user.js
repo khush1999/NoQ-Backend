@@ -16,26 +16,6 @@ const userSchema = new mongoose.Schema({
     isAdmin: {
         type: Boolean,
         default: false,
-    },
-    street: {
-        type: String,
-        default: ''
-    },
-    building: {
-        type: String,
-        default: ''
-    },
-    pincode :{
-        type: String,
-        default: ''
-    },
-    city: {
-        type: String,
-        default: ''
-    },
-    state: {
-        type: String,
-        default: ''
     }
 });
 

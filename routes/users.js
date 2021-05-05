@@ -1,43 +1,36 @@
 const {User} = require('../models/user');
+const {Address} = require('../models/address');
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-let otp
-   function generateOTP() 
-   {
-    // Declare a digits variable 
-    // which stores all digits
-    let digits = '0123456789';
-    let OTP = '';
-        for (let i = 0; i < 4; i++ ) {
-            OTP += digits[Math.floor(Math.random() * 10)];
-        }
-    return OTP;
-    }
-    
 /*Signup for the user -
   - If user's phone isn't in the database, then enter the details 
   - Click on Register 
 */
 router.post('/register', async (req,res)=>{
 let phoneNo=`+91${req.body.phone}` 
-let user;
+let user, address;
 try {
     user = new User({
         name: req.body.name,
         email: req.body.email,
         phone: phoneNo, // disabled this field in frontend
-        isAdmin: req.body.isAdmin,
+        isAdmin: req.body.isAdmin
+    })
+    user = await user.save();
+
+    address = new Address({
         street: req.body.street,
         building: req.body.building,
         pincode: req.body.pincode,
         city: req.body.city,
         state: req.body.state,
+        user: user._id
     })
-    user = await user.save();
-    
+    address = await address.save();
+    console.log("&&&&&&", address);
     req.session.phone = phoneNo;
     console.log(req.session.phone+"********************");
     req.session.save();
@@ -89,12 +82,7 @@ router.put('/:id',async (req, res)=> {
             name: req.body.name,
             email: req.body.email,
             phone: userExist.phone,
-            isAdmin: userExist.isAdmin,
-            street: req.body.street,
-            apartment: req.body.apartment,
-            zip: req.body.zip,
-            city: req.body.city,
-            country: userExist.country,
+            isAdmin: userExist.isAdmin
         },
         { new: true} // to reflect updated change
     ).then(user =>{

@@ -14,6 +14,19 @@ router.get(`/`, async (req, res) => {
   res.send(orderList);
 });
 
+router.get(`/orderHistory`, async (req, res) => {
+  const orderList = await Order.find()
+    .populate("user", "name")
+    .sort({ dateOrdered: -1 }).limit(5);
+  let user = req.query.userId;
+  orderHistory = orderList.filter(orders => orders.user.user_id == user)
+  console.log("#########", orderHistory);
+  if (!orderList) {
+    res.status(500).json({ success: false });
+  }
+  res.send(orderList);
+});
+
 router.get(`/:id`, async (req, res) => {
   const order = await Order.findById(req.params.id)
     .populate("user", "name")
@@ -30,6 +43,8 @@ router.get(`/:id`, async (req, res) => {
   }
   res.send(order);
 });
+
+const discountedPrice = (price,qty,discount)=> ((price*qty)*discount)/100
 
 router.post("/", async (req, res) => {
   let order;
@@ -52,13 +67,15 @@ router.post("/", async (req, res) => {
     const totalPrices = await Promise.all(
       orderItemsIdsResolved.map(async (orderItemId) => {
         const orderItem = await OrderItem.findById(orderItemId).populate(
-          "product",
-          "price"
+          ["product",
+          "price"]
         );
-  
-        const totalPrice = orderItem.product.price * orderItem.quantity;
-  
-        return totalPrice;
+
+        console.log("&&&&&&&&&&&&",orderItem);  
+        const totalDiscount = discountedPrice(orderItem.product.price,orderItem.quantity,orderItem.product.discount_percentage)  
+        const totalPrice = orderItem.product.price * orderItem.quantity-totalDiscount;
+          
+      return Math.round(totalPrice);
       })
     );
   
