@@ -72,6 +72,16 @@ app.get(`${api}/`, (req,res) => {
   }
 })
 
+app.get(`${api}/logout/`, (req,res) => {
+/*  To destroy session you can use
+        this function 
+    */
+    req.session.destroy(function(error){
+      res.send("Session Destroyed")
+    })
+
+})
+
 //Database
 mongoose
   .connect(process.env.CONNECTION_STRING, {
