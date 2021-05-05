@@ -35,12 +35,7 @@ router.get('/sendOtp', (req,res) => {
                 phonenumber: req.query.phonenumber,
                 data
             })
-        }).catch(
-            res.status(400).send({
-                message: "invalid number",
-                phonenumber: req.query.phonenumber,
-        })
-            ) 
+        }) 
      } else {
         res.status(400).send({
             message: "Wrong phone number :(",
@@ -77,19 +72,14 @@ router.get('/verifyOtp', async (req, res) => {
                         req.session.phone = phone;
                         req.session.save();
                     }
-                    console.log(data);
+                    // console.log(data);
                     res.status(200).send({
                         isUser: registered,
                         isVerified: data.status,
                         phoneNumber: data.to
                     })
                 }
-            }).catch(
-                res.status(400).send({
-            message: "invalid",
-            phonenumber: req.query.phonenumber,
-        })
-            )
+            })
     } else {
         res.status(400).send({
             message: "Wrong phone number or code :(",
