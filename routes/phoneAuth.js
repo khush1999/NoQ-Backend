@@ -70,6 +70,8 @@ router.get('/verifyOtp', async (req, res) => {
                     else
                     {
                         req.session.phone = phone;
+                        req.session.user_id = user._id;
+                        console.log(req.session + "********************");
                         req.session.save();
                     }
                     // console.log(data);

@@ -64,7 +64,7 @@ app.use(`${api}/auth`, phoneAuthRoutes);
 app.get(`${api}/`, (req,res) => {
   isLoggedIn = req.session; 
   if(isLoggedIn.phone) {
-    res.status(200).send({"data":isLoggedIn.phone});
+    res.status(200).send({"data":isLoggedIn.phone, "user_id" : isLoggedIn.user_id});
   } 
   else 
   {

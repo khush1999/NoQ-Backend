@@ -32,7 +32,8 @@ try {
     address = await address.save();
     console.log("&&&&&&", address);
     req.session.phone = phoneNo;
-    console.log(req.session.phone+"********************");
+    req.session.user_id = user._id;
+    console.log(req.session + "********************");
     req.session.save();
 }
 catch(err) {
