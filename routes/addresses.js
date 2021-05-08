@@ -45,7 +45,7 @@ router.get('/userAddresses', async (req,res)=>{
     }
     else{
         try {
-            const address = await Address.findOne({user: user_id});
+            const address = await Address.find({user: user_id});
             console.log("******************" + address);
             if(!address) {
                 res.status(500).json({message: 'The address with the given User ID was not found.'})
