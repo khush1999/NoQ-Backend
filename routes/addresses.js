@@ -15,23 +15,45 @@ router.get('/', async (req, res) =>{
     res.status(200).send(addressList);
 })
 
-// Gets only id for all addresses
-router.get('/:id', async(req,res)=>{
-    console.log(req.params.id);
-    if(!mongoose.Types.ObjectId.isValid(req.params.id)){
-        res.status(500).json({message: 'The category ID is not valid.'})
+// Gets all addresses fro a particular address_id
+// router.get('/:id', async(req,res)=>{
+//     console.log(req.params.id);
+//     if(!mongoose.Types.ObjectId.isValid(req.params.id)){
+//         res.status(500).json({message: 'The address ID is not valid.'})
+//     }
+//     else{
+//         try {
+//             const address = await Address.findById(req.params.id);
+//             console.log("******************" + address);
+//             if(!address) {
+//                 res.status(500).json({message: 'The address with the given ID was not found.'})
+//             } 
+//             res.status(200).send(address);        
+//         } 
+//         catch (error) {
+//             res.status(500).send("oops")    
+//         }
+//     } 
+// })
+
+// Gets all user addresses by user id
+router.get('/userAddresses', async (req,res)=>{
+    user_id = req.query.userId;
+    console.log("&&&&&&&&&&&&&&&&&", req.query.userId);
+    if(!mongoose.Types.ObjectId.isValid(req.query.userId)){
+        res.status(500).json({message: 'The user ID is not valid.'})
     }
     else{
         try {
-        const address = await Address.findById(req.params.id);
-        console.log("******************" + address);
-        if(!address) {
-            res.status(500).json({message: 'The category with the given ID was not found.'})
-        } 
-        res.status(200).send(address);        
+            const address = await Address.findOne({user: user_id});
+            console.log("******************" + address);
+            if(!address) {
+                res.status(500).json({message: 'The address with the given User ID was not found.'})
+            } 
+            res.status(200).send(address);        
         } 
         catch (error) {
-        res.status(500).send("oops")    
+            res.status(500).send("oops")    
         }
     } 
 })

@@ -21,15 +21,18 @@ try {
     })
     user = await user.save();
 
-    address = new Address({
-        street: req.body.street,
-        building: req.body.building,
-        pincode: req.body.pincode,
-        city: req.body.city,
-        state: req.body.state,
-        user: user._id
-    })
-    address = await address.save();
+    if(req.body.street != "" && req.body.building != "" && req.body.pincode != "" && req.body.city != "" && req.body.state != "") {
+        address = new Address({
+            street: req.body.street,
+            building: req.body.building,
+            pincode: req.body.pincode,
+            city: req.body.city,
+            state: req.body.state,
+            user: user._id
+        })
+        address = await address.save();
+    }
+    
     console.log("&&&&&&", address);
     req.session.phone = phoneNo;
     req.session.user_id = user._id;
