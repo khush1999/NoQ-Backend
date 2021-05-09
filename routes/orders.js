@@ -1,6 +1,8 @@
 const { Order } = require("../models/order");
 const express = require("express");
 const { OrderItem } = require("../models/order-item");
+const { Transaction } = require("../models/transaction");
+const { Invoice } = require("../models/invoice");
 const router = express.Router();
 
 router.get(`/`, async (req, res) => {
@@ -49,6 +51,7 @@ const discountedPrice = (price,qty,discount)=> ((price*qty)*discount)/100
 router.post("/", async (req, res) => {
   let order;
   try {
+    if(req.body.payment_id) {
     const orderItemsIds = Promise.all(
       req.body.orderItems.map(async (orderitem) => {
         let newOrderItem = new OrderItem({
@@ -72,8 +75,8 @@ router.post("/", async (req, res) => {
         );
 
         console.log("&&&&&&&&&&&&",orderItem);  
-        const totalDiscount = discountedPrice(orderItem.product.price,orderItem.quantity,orderItem.product.discount_percentage)  
-        const totalPrice = orderItem.product.price * orderItem.quantity-totalDiscount;
+        // const totalDiscount = discountedPrice(orderItem.product.price,orderItem.quantity,orderItem.product.discount_percentage)  
+        const totalPrice = orderItem.product.price * orderItem.quantity;
           
       return Math.round(totalPrice);
       })
@@ -87,11 +90,27 @@ router.post("/", async (req, res) => {
       orderItems: orderItemsIdsResolved,
       address: req.body.address,
       phone: req.body.phone,
-      status: req.body.status,
+      status: "success",
       totalPrice: totalPrice,
       user: req.body.user,
     });
     order1 = await order.save();
+    transaction = new Transaction({
+      orders: order1._id,
+      payment_id: req.body.payment_id,
+    })
+    transaction = await transaction.save();
+
+    invoice = new Invoice ({
+      orders: order1._id,
+      transaction_id: transaction._id,
+      user: order1.user,
+    })
+
+    invoice = await invoice.save();
+  } else {
+    return res.status(400).send("The transaction cannot happen!");
+  }
   } catch (error) {
     console.log("Not Found");
     if (!order1) return res.status(400).send("the order cannot be created!"); 

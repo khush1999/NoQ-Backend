@@ -89,6 +89,7 @@ router.post('/new', async (req, res) => {
         discount_percentage:req.body.discount_percentage,
         bulk_discount_percentage:req.body.bulk_discount_percentage,
         max_qty:req.body.max_qty,
+        store_id: req.body.store_id,
         created_at:req.body.created_at,
         updated_at:req.body.updated_at,
     });
@@ -124,6 +125,7 @@ router.post('/', uploadOptions.single('image'), async (req, res) => {
         discount_percentage:req.body.discount_percentage,
         bulk_discount_percentage:req.body.bulk_discount_percentage,
         max_qty:req.body.max_qty,
+        store_id: req.body.store_id,
         created_at:req.body.created_at,
         updated_at:req.body.updated_at,
     });
@@ -173,6 +175,7 @@ router.put('/:id', uploadOptions.single('image'), async (req, res) => {
             discount_percentage:req.body.discount_percentage,
             bulk_discount_percentage:req.body.bulk_discount_percentage,
             max_qty:req.body.max_qty,
+            store_id: req.body.store_id,
             created_at:req.body.created_at,
             updated_at:req.body.updated_at,
         },

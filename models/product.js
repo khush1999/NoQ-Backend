@@ -64,6 +64,9 @@ const productSchema = new mongoose.Schema({
     max_qty:{
         type:Number,
     },
+    store_id: {
+        type: String,
+    },
     created_at: {
         type: Date,
         default: Date.now,
