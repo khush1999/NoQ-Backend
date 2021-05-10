@@ -18,7 +18,13 @@ router.get(`/`, async (req, res) => {
 
 router.get(`/orderHistory`, async (req, res) => {
   const orderList = await Order.find()
-    .populate("user", "name")
+    .populate(["user"])
+    .populate({
+      path: "orderItems",
+      populate: {
+        path: "product",
+      },
+    })
     .sort({ dateOrdered: -1 }).limit(5);
   let user = req.query.userId;
   orderHistory = orderList.filter(orders => orders.user.user_id == user)
@@ -31,7 +37,7 @@ router.get(`/orderHistory`, async (req, res) => {
 
 router.get(`/:id`, async (req, res) => {
   const order = await Order.findById(req.params.id)
-    .populate("user", "name")
+    .populate(["user"])
     .populate({
       path: "orderItems",
       populate: {

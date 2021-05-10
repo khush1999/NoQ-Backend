@@ -49,6 +49,7 @@ const addressRoutes = require("./routes/addresses");
 const ordersRoutes = require("./routes/orders");
 const fileuploadRoutes = require("./routes/fileupload");
 const phoneAuthRoutes = require("./routes/phoneAuth");
+const invoiceRoutes = require("./routes/invoice");
 
 const api = process.env.API_URL;
 
@@ -59,6 +60,7 @@ app.use(`${api}/address`, addressRoutes);
 app.use(`${api}/orders`, ordersRoutes);
 app.use(`${api}/uploadfile`, fileuploadRoutes);
 app.use(`${api}/auth`, phoneAuthRoutes);
+app.use(`${api}/invoice`, invoiceRoutes);
 
 // isLoggedIn Check
 app.get(`${api}/`, (req,res) => {
