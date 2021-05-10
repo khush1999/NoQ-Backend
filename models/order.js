@@ -20,6 +20,9 @@ const orderSchema = mongoose.Schema({
         required: true,
         default: 'Pending',
     },
+    store_id: {
+        type: String,
+    },
     totalPrice: {
         type: Number,
     },

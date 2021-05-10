@@ -93,6 +93,7 @@ router.post("/", async (req, res) => {
       status: "success",
       totalPrice: totalPrice,
       user: req.body.user,
+      store_id: req.body.store_id,
     });
     order1 = await order.save();
     transaction = new Transaction({
