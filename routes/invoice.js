@@ -13,7 +13,15 @@ router.get('/', async (req, res) =>{
         res.status(500).json({message: 'The user ID is not valid.'})
     }
     else{
-        const invoice = await Invoice.find({user: user_id}).populate(["orders","user","transaction_id"]);
+        const invoice = await Invoice.find({user: user_id})
+        .populate(["orders","user","transaction_id"])
+        .populate({
+        path: "orders",
+         populate: {
+        path: "orderItems",
+        populate: "product",
+      },
+    });
     //     .populate({
     //   path: "orderItems",
     //   populate: {
