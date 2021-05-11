@@ -55,7 +55,7 @@ router.get(`/:id`, async (req, res) => {
 const discountedPrice = (price,qty,discount)=> ((price*qty)*discount)/100
 
 router.post("/", async (req, res) => {
-  let order;
+  let order,order1;
   try {
     if(req.body.payment_id) {
     const orderItemsIds = Promise.all(
@@ -64,24 +64,20 @@ router.post("/", async (req, res) => {
           quantity: orderitem.quantity,
           product: orderitem.product,
         });
-  
-        newOrderItem = await newOrderItem.save();
-  
-        return newOrderItem._id;
-      })
+         newOrderItem = await newOrderItem.save();
+        return newOrderItem;
+       })
     );
   
     const orderItemsIdsResolved = await orderItemsIds;
-  
-    const totalPrices = await Promise.all(
+     const totalPrices = await Promise.all(
       orderItemsIdsResolved.map(async (orderItemId) => {
-        const orderItem = await OrderItem.findById(orderItemId).populate(
+         const orderItem = await OrderItem.findById(orderItemId._id).populate(
           ["product",
           "price"]
         );
 
-        console.log("&&&&&&&&&&&&",orderItem);  
-        // const totalDiscount = discountedPrice(orderItem.product.price,orderItem.quantity,orderItem.product.discount_percentage)  
+         // const totalDiscount = discountedPrice(orderItem.product.price,orderItem.quantity,orderItem.product.discount_percentage)  
         const totalPrice = orderItem.product.price * orderItem.quantity;
           
       return Math.round(totalPrice);
@@ -89,9 +85,8 @@ router.post("/", async (req, res) => {
     );
   
     const totalPrice = totalPrices.reduce((a, b) => a + b, 0);
-  
-    console.log(totalPrices);
-  
+      
+   
     order = new Order({
       orderItems: orderItemsIdsResolved,
       address: req.body.address,
@@ -101,8 +96,8 @@ router.post("/", async (req, res) => {
       user: req.body.user,
       store_id: req.body.store_id,
     });
-    order1 = await order.save();
-    transaction = new Transaction({
+     order1 = await order.save();
+     transaction = new Transaction({
       orders: order1._id,
       payment_id: req.body.payment_id,
     })
@@ -123,7 +118,7 @@ router.post("/", async (req, res) => {
     if (!order1) return res.status(400).send("the order cannot be created!"); 
   }
   
-  let orders = await Order.findById(order1._id).populate(['address','user']);
+  let orders = await Order.findById(order1._id).populate(['address','user','orderItems']);
   res.status(200).send(orders);
 });
 
