@@ -13,26 +13,24 @@ router.get('/', async (req, res) =>{
         res.status(500).json({message: 'The user ID is not valid.'})
     }
     else{
-        const invoice = await Invoice.find({user: user_id})
-        .populate(["orders","user","transaction_id"])
+        Invoice.find({user: user_id})
         .populate({
-        path: "orders",
-         populate: {
-        path: "orderItems",
-        populate: "product",
-      },
-    });
-    //     .populate({
-    //   path: "orderItems",
-    //   populate: {
-    //     path: "product",
-    //   },
-    // })
-        console.log("******************" + invoice);
-            if(!invoice) {
-                res.status(500).json({message: 'The invoice with the given User ID was not found.'})
-            } 
-            res.status(200).send(invoice);
+            path: "orders", // populate blogs
+            populate: {
+         path: "orderItems", // in blogs, populate comments
+         populate:{
+             path:"product"
+         }
+      }
+   })
+   .then(product => {
+    // console.log(product[0].orders.orderItems[0]);
+    console.log(product);
+    res.status(200).json(product); 
+   }).catch((error)=>{
+       res.status(500).json({message: 'The invoice with the given User ID was not found.'})
+   });
+        
     }
 
 })

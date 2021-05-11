@@ -36,17 +36,11 @@ router.get(`/orderHistory`, async (req, res) => {
   res.send(orderList);
 });
 
+//Get Orders Item by order item id
 router.get(`/:id`, async (req, res) => {
-  const order = await Order.findById(req.params.id)
-    .populate(["user"])
-    .populate({
-      path: "orderItems",
-      populate: {
-        path: "product",
-        populate: "category",
-      },
-    });
-
+  const order = await OrderItem.findById(req.params.id)
+    .populate(["product"])
+    console.log("order___________",order);
   if (!order) {
     res.status(500).json({ success: false });
   }
