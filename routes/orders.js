@@ -17,18 +17,19 @@ router.get(`/`, async (req, res) => {
 });
 
 router.get(`/orderHistory`, async (req, res) => {
-  const orderList = await Order.find()
-    .populate(["user"])
-    .populate({
-      path: "orderItems",
-      populate: {
-        path: "product",
-      },
-    })
-    .sort({ dateOrdered: -1 }).limit(5);
   let user = req.query.userId;
-  orderHistory = orderList.filter(orders => orders.user.user_id == user)
-  console.log("#########", orderHistory);
+  const orderList = await Order.find({user:user})
+  .populate(["user"])
+  .populate({
+    path: "orderItems",
+    populate: {
+      path: "product",
+    },
+  })
+  .sort({ dateOrdered: -1 }).limit(5);
+  
+  // orderHistory = orderList.filter(orders => orders.user.user_id == user)
+  console.log("#########", orderList);
   if (!orderList) {
     res.status(500).json({ success: false });
   }
