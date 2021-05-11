@@ -7,13 +7,13 @@ const { Invoice } = require('../models/invoice');
 
 //GET INVOICE
 router.get('/', async (req, res) =>{
-    user_id = req.query.user_id;
-    console.log("&&&&&&&&&&&&&&&&&", req.query.user_id);
-    if(!mongoose.Types.ObjectId.isValid(req.query.user_id)){
-        res.status(500).json({message: 'The user ID is not valid.'})
+    order_id = req.query.order_id;
+    console.log("&&&&&&&&&&&&&&&&&", req.query.order_id);
+    if(!mongoose.Types.ObjectId.isValid(req.query.order_id)){
+        res.status(500).json({message: 'The order ID is not valid.'})
     }
     else{
-        Invoice.find({user: user_id})
+        Invoice.find({orders: order_id})
         .populate({
             path: "orders", // populate blogs
             populate: {
@@ -34,7 +34,6 @@ router.get('/', async (req, res) =>{
     }
 
 })
-
 
 
 module.exports = router;
