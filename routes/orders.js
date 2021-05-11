@@ -22,9 +22,6 @@ router.get(`/orderHistory`, async (req, res) => {
   .populate(["user"])
   .populate({
     path: "orderItems",
-    populate: {
-      path: "product",
-    },
   })
   .sort({ dateOrdered: -1 }).limit(5);
   
